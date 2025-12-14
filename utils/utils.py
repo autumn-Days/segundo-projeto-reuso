@@ -2,12 +2,26 @@ import subprocess as sp
 import time
 from typing import List
 
-def prepareFileDestiny(origin:str, destiny:str, metricType) -> None:
+def __createExtension(params:List[str]):
+    execType, metricType = tuple(params)
+    return f".{execTyple}_{metricType}"
+
+def __createPath(destiny:str,fileName:str,params:List[str]):
+    extension = __createExtension(params)
+    path = destiny + "/" + fileName + extension
+    return path
+
+def __createFileName(origin:str):
     fileWithExtension:str = origin.split("/")[-1]
     fileName = fileWithExtension.split(".")[0]
-    path:str = destiny + "/" + fileName + "." + metricType
-    print(destiny, ',', fileName, ',', metricType)
-    return path
+    return fileName
+
+def createDestinyPath(origin:str, destiny:str, params:List[str]) -> None:
+    fileName = __createFileName(origin)
+    extension = __createExtension(params)
+    destinyPath:str = __createPath(destiny,fileName,params)
+    #print(destiny, ',', fileName, ',', metricType) - não tem necessidade dessa parte
+    return destinyPath
 
 def createFile(path:str,content:str) -> None:
     with open(f"{path}","w") as file:
