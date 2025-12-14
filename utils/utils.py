@@ -4,7 +4,7 @@ from typing import List
 
 def __createExtension(params:List[str]):
     execType, metricType = tuple(params)
-    return f".{execTyple}_{metricType}"
+    return f".{execType}_{metricType}"
 
 def __createPath(destiny:str,fileName:str,params:List[str]):
     extension = __createExtension(params)

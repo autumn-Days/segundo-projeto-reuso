@@ -1,6 +1,7 @@
 import multiprocessing as mp
 from typing import List, Tuple
 from utils import utils as util
+import time #tirar depois
 
 #por falta de nome melhor
 #vai obter o tempo, preparar o path de destino, preparar o conteúdo do arquivo e salvar
@@ -12,8 +13,8 @@ def facade(origin:str,destiny:str,cmd:str,params:List[str]) -> None:
 
 def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime=False, realTime=False) -> None:
     execType = "concurrent" if concurrent else "sequential"
-    metricType = "real_time" if realTime else "cpu_time"
-    params = [metricType,execType]
+    metricType = "realTime" if realTime else "cpuTime"
+    params = [execType,metricType]
     processes = []
 
     for origin,destiny,cmd in programs:
@@ -26,7 +27,7 @@ def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime=F
         if (not concurrent):
             p.join()
     
-    if (conconrrent):
+    if (concurrent):
         for p in processes:
             p.join()
 
@@ -45,6 +46,7 @@ def main():
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
     execBatch(programs,concurrent=True, realTime=True)
+    time.sleep(3)
     execBatch(programs,concurrent=False, realTime=True)
 
 if __name__ == "__main__":
