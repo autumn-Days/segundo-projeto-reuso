@@ -1,6 +1,8 @@
 import subprocess as sp
+import os
+import resource
 import time
-from typing import List
+from typing import List,Tuple
 
 def __createExtension(params:List[str]):
     execType, metricType = tuple(params)
@@ -27,18 +29,37 @@ def createFile(path:str,content:str) -> None:
     with open(f"{path}","w") as file:
         file.write(content)
 
-def cronometrarSubprocess(path:str, cmd:str) -> float:
+def __cpuTimer4Linux(command:List[str]) -> float:
+    subProcess = sp.Popen(command)
+    _, _, rusage = os.wait4(subProcess.pid, 0) #pid, status, rusage
+    cpuTime = rusage.ru_utime + rusage.ru_stime
+    return cpuTime
+
+def __realTimer(command:List[str]) -> float:
+    start = time.time()
+    sp.run(command)
+    end =  time.time() - start
+    return end
+
+def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> float:
     command:List = []
     if cmd == "./":
         command = [f"./{path}"]
     else:
         command = [cmd,path]
 
-    start = time.time()
-    sp.run(command)
-    end = time.time() - start
+    return __realTimer(command) if realTime else __cpuTimer4Linux(command)
 
-    return end
 
 def prepareContent(totalTime):
     return f"segundos: {totalTime:.4f}\n"
+
+def initVariables(concurrent:bool, cpuTime:bool) -> Tuple[str,str]:
+    execType = "concurrent" if concurrent else "sequential"
+    metricType:str = ""
+
+    if (cpuTime):
+        metricType = "cpuTime"
+    else:
+        metricType = "realTime"
+    return (execType,metricType)
