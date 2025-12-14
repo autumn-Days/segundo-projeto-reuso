@@ -4,8 +4,8 @@ from typing import List
 
 def prepareFileDestiny(origin:str, destiny:str, metricType) -> None:
     fileWithExtension:str = origin.split("/")[-1]
-    fileName:str = fileWithExtension.split(".")[0]
-    path:str = destiny + fileName + "." + metricType
+    fileName = fileWithExtension.split(".")[0]
+    path:str = destiny + "/" + fileName + "." + metricType
     print(destiny, ',', fileName, ',', metricType)
     return path
 
@@ -16,7 +16,7 @@ def createFile(path:str,content:str) -> None:
 def cronometrarSubprocess(path:str, cmd:str) -> float:
     command:List = []
     if cmd == "./":
-        command = [f"./{cmd}"]
+        command = [f"./{path}"]
     else:
         command = [cmd,path]
 

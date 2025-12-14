@@ -7,7 +7,7 @@ def facade(origin:str,destiny:str,cmd:str,metricType:str) -> None:
     totalTime:float = util.cronometrarSubprocess(origin,cmd)
     destiny:str = util.prepareFileDestiny(origin,destiny,metricType)
     content:str = util.prepareContent(totalTime)
-    util .createFile(destiny,content)
+    util.createFile(destiny,content)
 
 def execBatch(programs:List[Tuple[str,str,str]], cpuTime=False, realTime=False) -> None:
     metricType = "real_time" if realTime else "cpu_time"
@@ -34,11 +34,11 @@ coisa de cada vez.
 """
 def main():
     programs = [
-        #("codigosTeste/triviais/script1.py","codigosTeste/triviais/outputs", "python3"),
+        ("codigosTeste/triviais/script1.py","codigosTeste/triviais/outputs", "python3"),
         ("codigosTeste/triviais/script2.js","codigosTeste/triviais/outputs", "node"),
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
-    execBatch(programs, False, True)
+    execBatch(programs, realTime=True)
 
 if __name__ == "__main__":
     main()
