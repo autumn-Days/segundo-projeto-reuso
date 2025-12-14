@@ -2,7 +2,9 @@ import subprocess as sp
 import os
 import resource
 import time
+import psutil #Essa biblioteca é para obter o tempo de cpu no windows. Tem que instalar ela.
 from typing import List,Tuple
+
 
 def __createExtension(params:List[str]):
     execType, metricType = tuple(params)
@@ -35,6 +37,13 @@ def __cpuTimer4Linux(command:List[str]) -> float:
     cpuTime = rusage.ru_utime + rusage.ru_stime
     return cpuTime
 
+def __cpuTimer4Windows(command:List[str]) -> float:
+    subProcess = psutil.Popen(command)
+    subProcess.wait()
+    cpuTime = subProcess.cpu_times()
+    cpuTime = cpuTime.user + cpuTime.system
+    return cpuTime
+
 def __realTimer(command:List[str]) -> float:
     start = time.time()
     sp.run(command)
@@ -48,7 +57,7 @@ def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> float:
     else:
         command = [cmd,path]
 
-    return __realTimer(command) if realTime else __cpuTimer4Linux(command)
+    return __realTimer(command) if realTime else __cpuTimer4Windows(command)
 
 
 def prepareContent(totalTime):
