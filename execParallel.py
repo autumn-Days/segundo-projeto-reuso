@@ -1,6 +1,8 @@
 import multiprocessing as mp
 from typing import List, Tuple, Callable
-from utils import utils as util
+#from utils import utils as util
+import utils.utils as util
+import utils.estatisticas as stats
 import time #tirar depois
 
 #por falta de nome melhor
@@ -90,13 +92,18 @@ def main():
         ("codigosTeste/triviais/script2.js","codigosTeste/triviais/outputs", "node"),
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
-    print(execBatch(programs,concurrent=True, cpuTime=True))
-    time.sleep(3)
-    execBatch(programs,concurrent=False, cpuTime=True)
-    time.sleep(0.5)
-    execBatch(programs,concurrent=True, realTime=True)
-    time.sleep(0.5)
-    execBatch(programs,concurrent=False, realTime=True)
+    lista = execBatch(programs,concurrent=True, cpuTime=True)
+    print(stats.fastest(lista))
+    print(stats.slowest(lista))
+    print(stats.mean(lista))
+    print(stats.stdDevPop(lista))
+
+    #time.sleep(3)
+    #execBatch(programs,concurrent=False, cpuTime=True)
+    #time.sleep(0.5)
+    #execBatch(programs,concurrent=True, realTime=True)
+    #time.sleep(0.5)
+    #execBatch(programs,concurrent=False, realTime=True)
 
 if __name__ == "__main__":
     main()

@@ -1,11 +1,17 @@
 import statistics
 from typing import List
 
-def mean(execTimes:List[float]):
-    return statistics.mean(execTimes)
+def mean(execTimes:[List[Tuple,str]]) -> float:
+    return statistics.mean([time[1] for time in execTimes])
 
-def stdDevPop(execTimes:List[float]):
-    return statistics.pstdev(execTimes)
+def stdDevPop(execTimes:[List[Tuple,str]])->float:
+    return statistics.pstdev([time[1] for time in execTimes])
+
+def fastest(execTimes:[List[Tuple,str]]) -> Tuple[str,float]:
+    return sorted(execTimes, key=lambda elem:elem[1])[0]
+
+def slowest(execTimes:List[Tuple[str,float]]) -> Tuple[str,float]:
+    return sorted(execTimes, key=lambda elem:elem[1])[-1]
 
 #por falta de nome melhor
 """
@@ -29,9 +35,12 @@ E a classe façade pode implementar um método que vai transformar isso tudo em 
 e imprimir
 """
 
-class decorator 
+#class decoratorStat:
+#    def __init__(self,)
 
-
+"""
+Essa daqui eu deixo para você implementar, Marcelo
+É só questão de salvar esse conteúdo em um arquivo/imprimir no terminal
 def statisticsFacade(execTimes:List[float],mean_=False, stdDevPop_=False, min_=False, max_=False):
     content = ""
     if mean_ :
@@ -43,3 +52,4 @@ def statisticsFacade(execTimes:List[float],mean_=False, stdDevPop_=False, min_=F
     if max_:
         content += f"Max: {max(execTimes)}\n"
     return content
+"""
