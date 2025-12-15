@@ -4,6 +4,7 @@ import resource
 import time
 import psutil #Essa biblioteca é para obter o tempo de cpu no windows. Tem que instalar ela.
 from typing import List,Tuple
+import multiprocessing as mp
 
 
 def __createExtension(params:List[str]):
@@ -72,3 +73,10 @@ def initVariables(concurrent:bool, cpuTime:bool) -> Tuple[str,str]:
     else:
         metricType = "realTime"
     return (execType,metricType)
+
+def queue2List(queue:mp.Queue[Any]) -> List[Any]:
+    list_ = []
+    while queue:
+        elem = queue.get()
+        list_.append(elem)
+    return list_

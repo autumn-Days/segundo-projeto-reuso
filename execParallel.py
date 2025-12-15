@@ -4,22 +4,23 @@ from utils import utils as util
 import time #tirar depois
 
 #por falta de nome melhor
-#vai obter o tempo, preparar o path de destino, preparar o conteúdo do arquivo e salvar
-def facade(origin:str,destiny:str,cmd:str,params:List[str],realTime=False) -> None:
+def facade(conn:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str],realTime=False) -> Tuple[str,float]:
     totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime)
     util.createFile(destiny,content)
+    queue.put((destiny,totalTime))
 
 def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:bool=False, realTime:bool=False) -> None:
     execType, metricType= util.initVariables(concurrent,cpuTime)
     params = [execType,metricType]
     processes = []
+    times:mp.queue[Tuple[str,float]] = mp.Queue()
 
     for origin,destiny,cmd in programs:
         p = mp.Process(
             target = facade,
-            args = (origin,destiny,cmd,params,realTime)
+            args = (times,origin,destiny,cmd,params,realTime)
         )
         processes.append(p)
         p.start()
@@ -29,6 +30,46 @@ def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:b
     if (concurrent):
         for p in processes:
             p.join()
+    return util.queue2List(times)
+
+
+class Runner:
+    def __init__(self, programs:List[Tuple[str,str,str]]) -> None:
+        self.programs = programs
+    
+    def execBatch(self,concurrent:bool=True, cpuTime:bool=False, realTime:bool=False) -> List[Tuple[str,float]]:
+        execType, metricType= util.initVariables(concurrent,cpuTime)
+        params = [execType,metricType]
+        processes = []
+
+        for origin,destiny,cmd in self.programs:
+            p = mp.Process(
+                target = facade,
+                args = (origin,destiny,cmd,params,realTime)
+            )
+            processes.append(p)
+            p.start()
+            if (not concurrent):
+                p.join()
+        
+        if (concurrent):
+            for p in processes:
+                p.join()
+
+#serve como decorator
+class Analyser:
+    def __init__(self, myRuner:"Runner"):
+        self.myRunner = myRunner
+        self.times:Tuple[str,float] = []
+
+
+    def mean(execTimes:List[float]):
+        return statistics.mean(execTimes)
+
+    def stdDevPop(execTimes:List[float]):
+        return statistics.pstdev(execTimes)
+
+
 
 """
 Uma outra funcionalidade legal é implementar os algoritmos no próprio arquivo principal
@@ -44,8 +85,8 @@ def main():
         ("codigosTeste/triviais/script2.js","codigosTeste/triviais/outputs", "node"),
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
-    execBatch(programs,concurrent=True, cpuTime=True)
-    time.sleep(1)
+    print(execBatch(programs,concurrent=True, cpuTime=True))
+    time.sleep(3)
     execBatch(programs,concurrent=False, cpuTime=True)
     time.sleep(1)
     execBatch(programs,concurrent=True, realTime=True)
