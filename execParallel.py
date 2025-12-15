@@ -1,13 +1,14 @@
 import multiprocessing as mp
-from typing import List, Tuple, Callable
+from typing import List, Tuple
+from utils.timerStrategy import TimerStrategy
+from utils.timerFactory import create_timer
 #from utils import utils as util
 import utils.utils as util
 import utils.estatisticas as stats
-import time #tirar depois
 
 #por falta de nome melhor
-def facade(queue:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str],realTime=False) -> Tuple[str,float]:
-    totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
+def facade(queue:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str], timer: TimerStrategy) -> Tuple[str,float]:
+    totalTime:float = util.cronometrarSubprocess(origin,cmd,timer)
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime)
     util.createFile(destiny,content)
@@ -17,16 +18,17 @@ def facade(queue:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str],realT
     #queue.put(elemTESTE)
 
 
-def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:bool=False, realTime:bool=False) -> None:
+def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:bool=False) -> None:
     execType, metricType= util.initVariables(concurrent,cpuTime)
     params = [execType,metricType]
+    timer = create_timer(cpuTime)
     processes = []
     times:mp.queue[Tuple[str,float]] = mp.Queue()
 
     for origin,destiny,cmd in programs:
         p = mp.Process(
             target = facade,
-            args = (times,origin,destiny,cmd,params,realTime)
+            args = (times,origin,destiny,cmd,params,timer)
         )
         processes.append(p)
         p.start()
@@ -65,16 +67,16 @@ class Runner:
 
 #serve como decorator
 class Analyser:
-    def __init__(self, myRuner:"Runner"):
+    def __init__(self, myRunner:"Runner"):
         self.myRunner = myRunner
         self.times:Tuple[str,float] = []
 
 
     def mean(execTimes:List[float]):
-        return statistics.mean(execTimes)
+        return stats.mean(execTimes)
 
     def stdDevPop(execTimes:List[float]):
-        return statistics.pstdev(execTimes)
+        return stats.pstdev(execTimes)
 
 
 
