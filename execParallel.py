@@ -4,12 +4,16 @@ from utils import utils as util
 import time #tirar depois
 
 #por falta de nome melhor
-def facade(conn:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str],realTime=False) -> Tuple[str,float]:
+def facade(queue:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str],realTime=False) -> Tuple[str,float]:
     totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime)
     util.createFile(destiny,content)
     queue.put((destiny,totalTime))
+    #elemTESTE = queue.get()
+    #print(f"\033[32m  {elemTESTE[0]}, {elemTESTE[1]}  \033[0m")
+    #queue.put(elemTESTE)
+
 
 def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:bool=False, realTime:bool=False) -> None:
     execType, metricType= util.initVariables(concurrent,cpuTime)
@@ -30,7 +34,7 @@ def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:b
     if (concurrent):
         for p in processes:
             p.join()
-    return util.queue2List(times)
+    return util.queue2List(times,len(programs))
 
 
 class Runner:
@@ -41,11 +45,12 @@ class Runner:
         execType, metricType= util.initVariables(concurrent,cpuTime)
         params = [execType,metricType]
         processes = []
+        myQueue = mp.Queue() 
 
         for origin,destiny,cmd in self.programs:
             p = mp.Process(
                 target = facade,
-                args = (origin,destiny,cmd,params,realTime)
+                args = (myQueue,origin,destiny,cmd,params,realTime)
             )
             processes.append(p)
             p.start()
@@ -88,9 +93,9 @@ def main():
     print(execBatch(programs,concurrent=True, cpuTime=True))
     time.sleep(3)
     execBatch(programs,concurrent=False, cpuTime=True)
-    time.sleep(1)
+    time.sleep(0.5)
     execBatch(programs,concurrent=True, realTime=True)
-    time.sleep(1)
+    time.sleep(0.5)
     execBatch(programs,concurrent=False, realTime=True)
 
 if __name__ == "__main__":

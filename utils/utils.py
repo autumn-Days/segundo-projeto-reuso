@@ -58,7 +58,7 @@ def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> float:
     else:
         command = [cmd,path]
 
-    return __realTimer(command) if realTime else __cpuTimer4Windows(command)
+    return __realTimer(command) if realTime else __cpuTimer4Linux(command)
 
 
 def prepareContent(totalTime):
@@ -74,9 +74,5 @@ def initVariables(concurrent:bool, cpuTime:bool) -> Tuple[str,str]:
         metricType = "realTime"
     return (execType,metricType)
 
-def queue2List(queue:mp.Queue[Any]) -> List[Any]:
-    list_ = []
-    while queue:
-        elem = queue.get()
-        list_.append(elem)
-    return list_
+def queue2List(queue:mp.Queue[Any],length) -> List[Any]:
+    return [queue.get() for _ in range(length)]
