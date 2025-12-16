@@ -5,6 +5,7 @@ import time
 import psutil #Essa biblioteca é para obter o tempo de cpu no windows. Tem que instalar ela.
 from typing import List,Tuple
 import multiprocessing as mp
+import signal
 
 
 def __createExtension(params:List[str]):
@@ -32,11 +33,29 @@ def createFile(path:str,content:str) -> None:
     with open(f"{path}","w") as file:
         file.write(content)
 
+
+#def contentReproducer(content:List[List[str]], _2print:bool,) -> None:
+
+
 def __cpuTimer4Linux(command:List[str]) -> float:
     subProcess = sp.Popen(command)
     _, _, rusage = os.wait4(subProcess.pid, 0) #pid, status, rusage
     cpuTime = rusage.ru_utime + rusage.ru_stime
     return cpuTime
+
+
+def __obtainOutput(command:List[str],getSignal=False) -> Tuple[str,str] | Tuple[str,str,str] :#retorna o output (stdout) e os erros (stderr)
+    subProcess = sp.run(
+        command,
+        capture_output=True,
+        text=True
+    signal = ""
+    if getSignal:
+        sigRcvd = -subProcess.returncode
+        signal = signal.Signals(sigRcvd).name
+        return (subProcess.stdout, subProcess.stderr,signal)
+
+    return (subProcess.stdout, subProcess.stderr)
 
 def __cpuTimer4Windows(command:List[str]) -> float:
     subProcess = psutil.Popen(command)
@@ -51,14 +70,14 @@ def __realTimer(command:List[str]) -> float:
     end =  time.time() - start
     return end
 
-def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> float:
+def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True, captureOutput=False) -> float:
     command:List = []
     if cmd == "./":
         command = [f"./{path}"]
     else:
         command = [cmd,path]
 
-    return __realTimer(command) if realTime else __cpuTimer4Linux(command)
+    return __realTimer(command,captureOutput) if realTime else __cpuTimer4Linux(command,captureOutput)
 
 
 def prepareContent(totalTime):

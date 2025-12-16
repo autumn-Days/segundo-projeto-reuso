@@ -6,8 +6,10 @@ import utils.estatisticas as stats
 import time #tirar depois
 
 #por falta de nome melhor
-def facade(queue:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str],realTime=False) -> Tuple[str,float]:
-    totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
+def facade(queue:mp.Queue, origin:str,destiny:str,
+    cmd:str,params:List[str],realTime=False,
+    captureOutput=False) -> Tuple[str,float]:
+    totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime,captureOutput)
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime)
     util.createFile(destiny,content)
@@ -17,7 +19,8 @@ def facade(queue:mp.Queue, origin:str,destiny:str,cmd:str,params:List[str],realT
     #queue.put(elemTESTE)
 
 
-def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:bool=False, realTime:bool=False) -> None:
+def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True,
+    cpuTime:bool=False, realTime:bool=False, captureOutput = False) -> None:
     execType, metricType= util.initVariables(concurrent,cpuTime)
     params = [execType,metricType]
     processes = []
@@ -26,7 +29,7 @@ def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True, cpuTime:b
     for origin,destiny,cmd in programs:
         p = mp.Process(
             target = facade,
-            args = (times,origin,destiny,cmd,params,realTime)
+            args = (times,origin,destiny,cmd,params,realTime, captureOutput)
         )
         processes.append(p)
         p.start()
@@ -62,7 +65,7 @@ class Runner:
         if (concurrent):
             for p in processes:
                 p.join()
-
+"""
 #serve como decorator
 class Analyser:
     def __init__(self, myRuner:"Runner"):
@@ -75,7 +78,7 @@ class Analyser:
 
     def stdDevPop(execTimes:List[float]):
         return statistics.pstdev(execTimes)
-
+"""
 
 
 """
