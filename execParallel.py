@@ -9,14 +9,13 @@ import time #tirar depois
 def facade(queue:mp.Queue, origin:str,destiny:str,
     cmd:str,params:List[str],realTime=False,
     captureOutput=False) -> Tuple[str,float]:
+
     totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime,captureOutput)
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime)
     util.createFile(destiny,content)
     queue.put((destiny,totalTime))
-    #elemTESTE = queue.get()
-    #print(f"\033[32m  {elemTESTE[0]}, {elemTESTE[1]}  \033[0m")
-    #queue.put(elemTESTE)
+
 
 
 def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True,

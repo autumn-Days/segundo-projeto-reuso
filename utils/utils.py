@@ -7,91 +7,137 @@ from typing import List,Tuple
 import multiprocessing as mp
 import signal
 
+#INÍCIO: funções de Reprodutor
+def __createSuffix(params:List[str]):
+    #modificado
+    #ok
+    """
+    execType: parallel, sequential
+    metricType: cpu_time, real_time
+    output
+    signal
+    [(valor|None),(valor|None),(valor|None),(valor|None)]
+    """
+    suffix = ""
 
-def __createExtension(params:List[str]):
-    execType, metricType = tuple(params)
-    return f".{execType}_{metricType}"
-
+    for param in params:
+        if param != None:
+            suffix += f"_{param}"
+    return f"{suffix}.dat"
 def __createPath(destiny:str,fileName:str,params:List[str]):
+    #ok
     extension = __createExtension(params)
     path = destiny + "/" + fileName + extension
     return path
-
 def __createFileName(origin:str):
+    #ok
     fileWithExtension:str = origin.split("/")[-1]
     fileName = fileWithExtension.split(".")[0]
     return fileName
 
 def createDestinyPath(origin:str, destiny:str, params:List[str]) -> None:
+    #ok
     fileName = __createFileName(origin)
     extension = __createExtension(params)
     destinyPath:str = __createPath(destiny,fileName,params)
-    #print(destiny, ',', fileName, ',', metricType) - não tem necessidade dessa parte
     return destinyPath
 
 def createFile(path:str,content:str) -> None:
+    #ok
     with open(f"{path}","w") as file:
         file.write(content)
+def prepareContent(totalTime:float=None, output:Tuple[str,str]=None, signal:str=None) -> str:
+    #ok
+    #modificado
+    content = ""
+    if totalTime:
+        content += f"segundos:\n\t{totalTime:.5f}\n" 
+    if output:
+        stdout = output[0]
+        stderr = output[1]
+        content += f"stdout:\n\t{stdout}\n"
+        content += f"stderr:\n\t{stderr}\n"
+    if signal:
+        content += f"signal:\n\t{signal}\n"
+    return content
+#FIM: funções de Reprodutor
 
 
-#def contentReproducer(content:List[List[str]], _2print:bool,) -> None:
-
-
-def __cpuTimer4Linux(command:List[str]) -> float:
-    subProcess = sp.Popen(command)
-    _, _, rusage = os.wait4(subProcess.pid, 0) #pid, status, rusage
-    cpuTime = rusage.ru_utime + rusage.ru_stime
-    return cpuTime
-
-
-def __obtainOutput(command:List[str],getSignal=False) -> Tuple[str,str] | Tuple[str,str,str] :#retorna o output (stdout) e os erros (stderr)
-    subProcess = sp.run(
-        command,
-        capture_output=True,
-        text=True
-    signal = ""
-    if getSignal:
-        sigRcvd = -subProcess.returncode
-        signal = signal.Signals(sigRcvd).name
-        return (subProcess.stdout, subProcess.stderr,signal)
-
-    return (subProcess.stdout, subProcess.stderr)
-
-def __cpuTimer4Windows(command:List[str]) -> float:
-    subProcess = psutil.Popen(command)
-    subProcess.wait()
-    cpuTime = subProcess.cpu_times()
-    cpuTime = cpuTime.user + cpuTime.system
-    return cpuTime
-
-def __realTimer(command:List[str]) -> float:
-    start = time.time()
-    sp.run(command)
-    end =  time.time() - start
-    return end
-
-def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True, captureOutput=False) -> float:
+#Início: Executor
+def __makeCommand(path:str,cmd:str) -> List[str]:
+    #ok
     command:List = []
     if cmd == "./":
         command = [f"./{path}"]
     else:
         command = [cmd,path]
+    return command
+def __realTimer(command:List[str]) -> float:
+    #ok
+    start = time.time()
+    sp.run(command)
+    end =  time.time() - start
+    return end
+def __cpuTimer4Linux(command:List[str]) -> float:
+    #ok
+    subProcess = sp.Popen(command)
+    _, _, rusage = os.wait4(subProcess.pid, 0) #pid, status, rusage
+    cpuTime = rusage.ru_utime + rusage.ru_stime
+    return cpuTime
+def __cpuTimer4Windows(command:List[str]) -> float:
+    #vou tirar depois
+    subProcess = psutil.Popen(command)
+    subProcess.wait()
+    cpuTime = subProcess.cpu_times()
+    cpuTime = cpuTime.user + cpuTime.system
+    return cpuTime
+def __obtainOutput(command:List[str],captureOutput=False,captureSignal=False) -> Any : # ((str,str,str),(str,str),str
+    #ok
+    subProcess = sp.run(
+        command,
+        capture_output=True,
+        text=True)
+    
+    sigRcvd = -subProcess.returncode
+    signal = signal.Signals(sigRcvd).name
+    if captureOutput and captureSignal:
+        return (subProcess.stdout, subProcess.stderr,signal)
+    elif captureOutput:
+        return (subProcess.stdout, subProcess.stderr)
+    elif captureSignal:
+        return signal
+def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> Tuple[str,float,str]:
+    #ok
+    command = __makeCommand(path,cmd)
+    if realTime:
+        realTimeTaken = __realTimer(command)
+        return (path,realTimeTaken,"real_time")
+    else:
+        cpuTimeTaken = __cpuTimer4Linux(command) #depois só deixar disponível a versão do linux de `__cpuTimer4Linux`
+        return (path,cpuTimeTaken,"cpu_time")
+def obtainSubprocessInfo(path:str, cmd:str, captureOutput=False, captureSignal=False) -> Tuple[Tuple[str,float],str]:
+    #ok
+    command = __makeCommand(path,cmd)
+    if (captureOutput and captureSignal):
+        stdout,stderr,sig = __obtainOutput(command,captureOutput=True, captureSignal=True)
+        return (stdout,stderr,sig)
+    elif (captureOutput):
+        stdout,stderr = __obtainOutput(command,captureOutput=True)
+        return (stdout,stderr)
+    elif (captureSignal):
+        sig = __obtainOutput(command,captureSignal=True)
+        return sig
+#FIM: Executor
 
-    return __realTimer(command,captureOutput) if realTime else __cpuTimer4Linux(command,captureOutput)
-
-
-def prepareContent(totalTime):
-    return f"segundos: {totalTime:.4f}\n"
 
 def initVariables(concurrent:bool, cpuTime:bool) -> Tuple[str,str]:
     execType = "concurrent" if concurrent else "sequential"
     metricType:str = ""
-
     if (cpuTime):
         metricType = "cpuTime"
     else:
         metricType = "realTime"
     return (execType,metricType)
-
 def queue2List(queue:mp.Queue[Any],length) -> List[Any]:
     return [queue.get() for _ in range(length)]
+#FIM: FAÇADE
