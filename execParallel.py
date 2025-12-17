@@ -126,12 +126,19 @@ def main():
         ("codigosTeste/triviais/script2.js","codigosTeste/triviais/outputs", "node"),
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
+    lista = execBatch(programs,captureOutput=True, captureSignal=True)
+    time.sleep(3)
+    lista = execBatch(programs,captureOutput=True)
+    time.sleep(3)
+    lista = execBatch(programs,captureSignal=True)
+    time.sleep(3)
+    """
     lista = execBatch(programs,concurrent=True, cpuTime=True)
     print(stats.fastest(lista))
     print(stats.slowest(lista))
     print(stats.mean(lista))
     print(stats.stdDevPop(lista))
-
+    """
     #time.sleep(3)
     #execBatch(programs,concurrent=False, cpuTime=True)
     #time.sleep(0.5)

@@ -97,15 +97,17 @@ def __obtainOutput(command:List[str],captureOutput=False,captureSignal=False) ->
         command,
         capture_output=True,
         text=True)
-    
-    sigRcvd = -subProcess.returncode
-    signal = signal.Signals(sigRcvd).name
+    _signal = None
+    if subProcess.returncode < 0 :
+        sigRcvd = -subProcess.returncode
+        _signal = signal.Signals(sigRcvd).name #só da para mapear em um nome se o código for negativo
+    _signal = subProcess.returncode
     if captureOutput and captureSignal:
-        return (subProcess.stdout, subProcess.stderr,signal)
+        return (subProcess.stdout, subProcess.stderr,_signal)
     elif captureOutput:
         return (subProcess.stdout, subProcess.stderr)
     elif captureSignal:
-        return signal
+        return _signal
 def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> Tuple[str,float,str]:
     #ok
     command = __makeCommand(path,cmd)
