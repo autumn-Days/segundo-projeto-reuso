@@ -8,13 +8,10 @@ import time #tirar depois
 #por falta de nome melhor
 def facadeTime(queue:mp.Queue, origin:str,destiny:str,
     cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
-
     totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
-    #print(totalTime)
-    #time.sleep(2)
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime=totalTime[1])
-    util.createFile(destiny,content)
+    util.createFile(destiny,content) 
     queue.put((origin,totalTime))
 
 
@@ -27,6 +24,16 @@ def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
     content:str = util.prepareContent(output=(stdout,stderr),signal=signal)
     util.createFile(destiny,content)
     queue.put((origin,(stdout,stderr,signal)))
+
+#
+"""
+def display(content:List[Tuple]):
+    typeReproducao = 0 #0 se for de tempo & 1 se for de output
+    if type(content[0][1]) == tuple :
+        typeReproducao = 1
+    if typeReproducao:
+        for con in content:
+"""            
 
 
 def execBatch(programs:List[Tuple[str,str,str]],
