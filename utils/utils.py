@@ -61,7 +61,7 @@ def prepareContent(totalTime:float=None, output:Tuple[str,str]=None, signal:str=
         content += f"signal:\n\t{signal}\n"
     return content
 
-def display(origin)
+#def display(origin)
 #FIM: funções de Reprodutor
 
 

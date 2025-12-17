@@ -147,7 +147,7 @@ def main():
     time.sleep(3)
     
     
-    """
+    
     #Teste das estatísticas
     #está pegando
     lista = execBatch(programs,concurrent=True, cpuTime=True)
@@ -155,8 +155,8 @@ def main():
     print(stats.slowest(lista))
     print(stats.mean(lista))
     print(stats.stdDevPop(lista))
-    """
-    """
+    
+    
     #Testes dos tipos de execução com tipos de medidas diferentes
     #Está pegando
     execBatch(programs,concurrent=False, cpuTime=True)
@@ -164,6 +164,6 @@ def main():
     execBatch(programs,concurrent=True, realTime=True)
     time.sleep(0.5)
     execBatch(programs,concurrent=False, realTime=True)
-    """
+    
 if __name__ == "__main__":
     main()
