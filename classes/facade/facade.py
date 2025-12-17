@@ -20,6 +20,7 @@ class Facade:
             realTime, cpuTime = True, False
 
         self.results = self.runner.execBatch(concurrent,cpuTime,realTime,captureOutput,captureSignal)
+        return self.results
 
     def print_stats(self, mean=False, stdDevPop=False, slowest=False, fastest=False):
         """     Aqui está comentado apenas para preservar o código puro, sem o print

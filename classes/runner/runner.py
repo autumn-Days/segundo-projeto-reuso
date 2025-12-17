@@ -4,13 +4,13 @@ import functions.utils.utils as util
 import functions.reproducer.reproducer as repro
 import functions.executor.executor as exec
 
-def facadeTime(queue:mp.Queue, origin:str,destiny:str,
+def facadeTime(queue:mp.Queue, origin:str, destiny:str,
     cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
     totalTime:float = exec.cronometrarSubprocess(origin,cmd,realTime)
-    destiny:str = repro.createDestinyPath(origin,destiny,params)
+    destinyPath:str = repro.createDestinyPath(origin,destiny,params)
     content:str = repro.prepareContent(totalTime=totalTime[1])
-    repro.createFile(destiny,content) 
-    queue.put((origin,totalTime))
+    repro.createFile(destinyPath,content) 
+    queue.put((destinyPath,totalTime))
 
 
 def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
@@ -18,10 +18,10 @@ def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
     captureSignal:bool) -> Tuple[str,Tuple[str,str,str]]:
     execCommand:str = exec.__makeCommand(origin,cmd)
     stdout,stderr,signal = exec.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
-    destiny:str = repro.createDestinyPath(origin,destiny,params)
+    destinyPath:str = repro.createDestinyPath(origin,destiny,params)
     content:str = repro.prepareContent(output=(stdout,stderr),signal=signal)
-    repro.createFile(destiny,content)
-    queue.put((origin,(stdout,stderr,signal)))
+    repro.createFile(destinyPath,content)
+    queue.put((destinyPath,(stdout,stderr,signal)))
 
 
 class Runner:
@@ -62,5 +62,6 @@ class Runner:
         if (concurrent):
             for p in processes:
                 p.join()
+        
         return util.queue2List(infos,len(self.programs))
 
