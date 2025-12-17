@@ -11,7 +11,7 @@ def facadeTime(queue:mp.Queue, origin:str,destiny:str,
 
     totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
     destiny:str = util.createDestinyPath(origin,destiny,params)
-    content:str = util.prepareContent(totalTime=totalTime)
+    content:str = util.prepareContent(totalTime=totalTime[1])
     util.createFile(destiny,content)
     queue.put((destiny,totalTime))
 
@@ -39,7 +39,7 @@ def execBatch(programs:List[Tuple[str,str,str]],
 
     processes = []
     #Essa lista vai guardar todos os dados dos programas
-    infos:mp.queue[Tuple[str,float]] = mp.Queue()
+    infos:mp.queue[Any] = mp.Queue()
 
     for origin,destiny,cmd in programs:
         p = None
