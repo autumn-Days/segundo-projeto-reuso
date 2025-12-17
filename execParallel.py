@@ -13,7 +13,7 @@ def facadeTime(queue:mp.Queue, origin:str,destiny:str,
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime=totalTime[1])
     util.createFile(destiny,content)
-    queue.put((destiny,totalTime))
+    queue.put((origin,totalTime))
 
 
 def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
@@ -24,7 +24,7 @@ def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(output=(stdout,stderr),signal=signal)
     util.createFile(destiny,content)
-    queue.put((destiny,(stdout,stderr,signal)))
+    queue.put((origin,(stdout,stderr,signal)))
 
 
 def execBatch(programs:List[Tuple[str,str,str]],
@@ -127,6 +127,9 @@ def main():
         ("codigosTeste/triviais/script2.js","codigosTeste/triviais/outputs", "node"),
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
+    
+    """
+    #Teste da obtenção de outputs
     lista = execBatch(programs,captureOutput=True, captureSignal=True)
     time.sleep(3)
     lista = execBatch(programs,captureOutput=True)
@@ -134,18 +137,21 @@ def main():
     lista = execBatch(programs,captureSignal=True)
     time.sleep(3)
     """
+    """
+    #Teste das estatísticas
     lista = execBatch(programs,concurrent=True, cpuTime=True)
     print(stats.fastest(lista))
     print(stats.slowest(lista))
     print(stats.mean(lista))
     print(stats.stdDevPop(lista))
     """
-    #time.sleep(3)
-    #execBatch(programs,concurrent=False, cpuTime=True)
-    #time.sleep(0.5)
-    #execBatch(programs,concurrent=True, realTime=True)
-    #time.sleep(0.5)
-    #execBatch(programs,concurrent=False, realTime=True)
-
+    
+    #Testes dos tipos de execução com tipos de medidas diferentes
+    execBatch(programs,concurrent=False, cpuTime=True)
+    time.sleep(0.5)
+    execBatch(programs,concurrent=True, realTime=True)
+    time.sleep(0.5)
+    execBatch(programs,concurrent=False, realTime=True)
+    
 if __name__ == "__main__":
     main()
