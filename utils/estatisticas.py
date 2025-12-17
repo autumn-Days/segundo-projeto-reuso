@@ -2,16 +2,16 @@ import statistics
 from typing import List
 
 def mean(execTimes:[List[Tuple,str]]) -> float:
-    return statistics.mean([time[1] for time in execTimes])
+    return statistics.mean([time[1][1] for time in execTimes])
 
 def stdDevPop(execTimes:[List[Tuple,str]])->float:
-    return statistics.pstdev([time[1] for time in execTimes])
+    return statistics.pstdev([time[1][1] for time in execTimes])
 
 def fastest(execTimes:[List[Tuple,str]]) -> Tuple[str,float]:
-    return sorted(execTimes, key=lambda elem:elem[1])[0]
+    return sorted(execTimes, key=lambda elem:elem[1][1])[0]
 
 def slowest(execTimes:List[Tuple[str,float]]) -> Tuple[str,float]:
-    return sorted(execTimes, key=lambda elem:elem[1])[-1]
+    return sorted(execTimes, key=lambda elem:elem[1][1])[-1]
 
 #por falta de nome melhor
 """
