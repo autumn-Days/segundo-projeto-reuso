@@ -140,7 +140,9 @@ def main():
     interface = Facade()
 
     interface.setPrograms(programs)
+    interface.setConcurrentBatch()
     lista = interface.runBatch(captureOutput=True, captureSignal=True)
+    
     print(lista)
 
     interface.print_stats(mean=True,stdDevPop=True,slowest=True,fastest=True)

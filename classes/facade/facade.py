@@ -6,6 +6,7 @@ class Facade:
         self.runner = Runner(programs)
         self.analyser = Analyser(self.runner)
         self.results = None
+        self.concurrent = True
 
     def setPrograms(self, programs):
         self.runner.programs = programs
@@ -19,8 +20,16 @@ class Facade:
         if realTime == cpuTime :
             realTime, cpuTime = True, False
 
-        self.results = self.runner.execBatch(concurrent,cpuTime,realTime,captureOutput,captureSignal)
+        self.concurrent = concurrent
+
+        self.results = self.runner.execBatch(self.concurrent,cpuTime,realTime,captureOutput,captureSignal)
         return self.results
+
+    def setConcurrentBatch(self):
+        self.concurrent = True
+    
+    def setSequentialBatch(self):
+        self.concurrent = False
 
     def print_stats(self, mean=False, stdDevPop=False, slowest=False, fastest=False):
         """     Aqui está comentado apenas para preservar o código puro, sem o print
