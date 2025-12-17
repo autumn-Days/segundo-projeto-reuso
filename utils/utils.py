@@ -52,11 +52,11 @@ def prepareContent(totalTime:float=None, output:Tuple[str,str]=None, signal:str=
     content = ""
     if totalTime:
         content += f"segundos:\n\t{totalTime:.5f}\n" 
-    if output:
+    if output != (None,None):
         stdout = output[0]
         stderr = output[1]
-        content += f"stdout:\n\t{stdout}\n"
-        content += f"stderr:\n\t{stderr}\n"
+        content += f"stdout:\n\n{stdout}\n\n"
+        content += f"stderr:\n\n{stderr}\n\n"
     if signal:
         content += f"signal:\n\t{signal}\n"
     return content
@@ -101,13 +101,13 @@ def __obtainOutput(command:List[str],captureOutput=False,captureSignal=False) ->
     if subProcess.returncode < 0 :
         sigRcvd = -subProcess.returncode
         _signal = signal.Signals(sigRcvd).name #só da para mapear em um nome se o código for negativo
-    _signal = subProcess.returncode
+    _signal = str(subProcess.returncode)
     if captureOutput and captureSignal:
         return (subProcess.stdout, subProcess.stderr,_signal)
     elif captureOutput:
-        return (subProcess.stdout, subProcess.stderr)
+        return (subProcess.stdout, subProcess.stderr,None)
     elif captureSignal:
-        return _signal
+        return (None,None,_signal)
 def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> Tuple[str,float,str]:
     #ok
     command = __makeCommand(path,cmd)
@@ -119,6 +119,10 @@ def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> Tuple[str,
         return (path,cpuTimeTaken,"cpu_time")
 def obtainSubprocessInfo(execCommand, captureOutput, captureSignal) -> Tuple[Any,Any,Any]:
     #ok
+    stdout,stderr,sig = __obtainOutput(execCommand,captureOutput=captureOutput, captureSignal=captureSignal)
+    return (stdout,stderr,sig)
+    
+    """
     if (captureOutput and captureSignal):
         stdout,stderr,sig = __obtainOutput(execCommand,captureOutput=True, captureSignal=True)
         return (stdout,stderr,sig)
@@ -128,6 +132,7 @@ def obtainSubprocessInfo(execCommand, captureOutput, captureSignal) -> Tuple[Any
     elif (captureSignal):
         sig = __obtainOutput(execCommand,captureSignal=True)
         return (None,None,sig)
+    """
 #FIM: Executor
 
 

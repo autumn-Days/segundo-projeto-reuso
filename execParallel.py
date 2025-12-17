@@ -123,6 +123,7 @@ captureSignal=False
 def main():
     programs = [
         ("codigosTeste/triviais/script1.py","codigosTeste/triviais/outputs", "python3"),
+        ("codigosTeste/triviais/script1_defeituoso.py","codigosTeste/triviais/outputs", "python3"),
         ("codigosTeste/triviais/script2.js","codigosTeste/triviais/outputs", "node"),
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
