@@ -1,7 +1,7 @@
 import subprocess as sp
 from typing import List,Tuple,Any
 import signal
-from strategy.timerStrategy import timer_selector
+from classes.strategy.timerStrategy import timer_selector
 
 #Início: Executor
 def __makeCommand(path:str,cmd:str) -> List[str]:

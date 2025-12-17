@@ -1,5 +1,5 @@
-import utils.estatisticas as stats
-from runner.runner import Runner
+import functions.utils.estatisticas as stats
+from classes.runner.runner import Runner
 from typing import List, Tuple
 
 class Analyser:

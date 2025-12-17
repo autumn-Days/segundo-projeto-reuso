@@ -1,5 +1,5 @@
-from runner.runner import Runner
-from analyser.analyser import Analyser
+from classes.runner.runner import Runner
+from classes.analyser.analyser import Analyser
 
 class Facade:
     def __init__(self, programs=None):
@@ -16,7 +16,10 @@ class Facade:
             realTime=False,
             captureOutput=False,
             captureSignal=False) -> None:
-        self.results = self.runner.execBatch(concurrent, cpuTime,realTime,captureOutput,captureSignal)
+        if realTime == cpuTime :
+            realTime, cpuTime = True, False
+
+        self.results = self.runner.execBatch(concurrent,cpuTime,realTime,captureOutput,captureSignal)
 
     def print_stats(self, mean=False, stdDevPop=False, slowest=False, fastest=False):
         """     Aqui está comentado apenas para preservar o código puro, sem o print

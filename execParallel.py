@@ -1,14 +1,14 @@
 import multiprocessing as mp
 from typing import List, Tuple, Any
-import utils.utils as util
-import reproducer.reproducer as repro
-import executor.executor as exec
-import utils.estatisticas as stats
+import functions.utils.utils as util
+import functions.reproducer.reproducer as repro
+import functions.executor.executor as exec
+import functions.utils.estatisticas as stats
 import time #tirar depois
 
-from facade.facade import Facade
-from runner.runner import Runner
-from analyser.analyser import Analyser
+from classes.facade.facade import Facade
+from classes.runner.runner import Runner
+from classes.analyser.analyser import Analyser
 
 #por falta de nome melhor
 """
@@ -140,7 +140,7 @@ def main():
     interface = Facade()
 
     interface.setPrograms(programs)
-    interface.runBatch(concurrent=True, cpuTime=True)
+    interface.runBatch(captureOutput=True, captureSignal=True)
 
     interface.print_stats(mean=True,stdDevPop=True,slowest=True,fastest=True)
     

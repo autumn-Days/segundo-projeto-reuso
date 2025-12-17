@@ -1,8 +1,8 @@
 import multiprocessing as mp
 from typing import List, Tuple, Any
-import utils.utils as util
-import reproducer.reproducer as repro
-import executor.executor as exec
+import functions.utils.utils as util
+import functions.reproducer.reproducer as repro
+import functions.executor.executor as exec
 
 def facadeTime(queue:mp.Queue, origin:str,destiny:str,
     cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
