@@ -10,6 +10,8 @@ def facadeTime(queue:mp.Queue, origin:str,destiny:str,
     cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
 
     totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
+    #print(totalTime)
+    #time.sleep(2)
     destiny:str = util.createDestinyPath(origin,destiny,params)
     content:str = util.prepareContent(totalTime=totalTime[1])
     util.createFile(destiny,content)
@@ -128,7 +130,7 @@ def main():
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
     
-    """
+    
     #Teste da obtenção de outputs
     lista = execBatch(programs,captureOutput=True, captureSignal=True)
     time.sleep(3)
@@ -136,22 +138,25 @@ def main():
     time.sleep(3)
     lista = execBatch(programs,captureSignal=True)
     time.sleep(3)
-    """
+    
+    
     """
     #Teste das estatísticas
+    #está pegando
     lista = execBatch(programs,concurrent=True, cpuTime=True)
     print(stats.fastest(lista))
     print(stats.slowest(lista))
     print(stats.mean(lista))
     print(stats.stdDevPop(lista))
     """
-    
+    """
     #Testes dos tipos de execução com tipos de medidas diferentes
+    #Está pegando
     execBatch(programs,concurrent=False, cpuTime=True)
     time.sleep(0.5)
     execBatch(programs,concurrent=True, realTime=True)
     time.sleep(0.5)
     execBatch(programs,concurrent=False, realTime=True)
-    
+    """
 if __name__ == "__main__":
     main()

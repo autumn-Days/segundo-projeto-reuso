@@ -52,16 +52,17 @@ def prepareContent(totalTime:float=None, output:Tuple[str,str]=None, signal:str=
     content = ""
     if totalTime:
         content += f"segundos:\n\t{totalTime:.5f}\n" 
-    if output != (None,None):
+    if (output != (None,None) and (totalTime == None)):
         stdout = output[0]
         stderr = output[1]
         content += f"stdout:\n\n{stdout}\n\n"
         content += f"stderr:\n\n{stderr}\n\n"
     if signal:
         content += f"signal:\n\t{signal}\n"
-    return 
+    return content
 
-def imprimirTempo()
+def imprimirTempo():
+    pass
 #FIM: funções de Reprodutor
 
 
@@ -79,17 +80,16 @@ def __realTimer(command:List[str]) -> float:
     start = time.time()
     sp.run(
         command,
-        stdout=sp.PIPE
-        stderr=sp.PIPE,
-        )
+        stdout=sp.PIPE,
+        stderr=sp.PIPE)
     end =  time.time() - start
     return end
 def __cpuTimer4Linux(command:List[str]) -> float:
     #ok
     subProcess = sp.Popen(
-        command
-        stdout=sp.PIPE
-        sterr=sp.PIPE)
+        command,
+        stdout=sp.PIPE,
+        stderr=sp.PIPE)
     _, _, rusage = os.wait4(subProcess.pid, 0) #pid, status, rusage
     cpuTime = rusage.ru_utime + rusage.ru_stime
     return cpuTime
