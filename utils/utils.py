@@ -3,7 +3,7 @@ import os
 import resource
 import time
 import psutil #Essa biblioteca é para obter o tempo de cpu no windows. Tem que instalar ela.
-from typing import List,Tuple
+from typing import List,Tuple,Any
 import multiprocessing as mp
 import signal
 
@@ -16,7 +16,7 @@ def __createSuffix(params:List[str]):
     metricType: cpu_time, real_time
     output
     signal
-    [(valor|None),(valor|None),(valor|None),(valor|None)]
+    [(valor|None),(valor1|valor2|None),(valor|None),(valor|None)]
     """
     suffix = ""
 
@@ -26,7 +26,7 @@ def __createSuffix(params:List[str]):
     return f"{suffix}.dat"
 def __createPath(destiny:str,fileName:str,params:List[str]):
     #ok
-    extension = __createExtension(params)
+    extension = __createSuffix(params)
     path = destiny + "/" + fileName + extension
     return path
 def __createFileName(origin:str):
@@ -38,7 +38,7 @@ def __createFileName(origin:str):
 def createDestinyPath(origin:str, destiny:str, params:List[str]) -> None:
     #ok
     fileName = __createFileName(origin)
-    extension = __createExtension(params)
+    extension = __createSuffix(params)
     destinyPath:str = __createPath(destiny,fileName,params)
     return destinyPath
 
@@ -115,29 +115,31 @@ def cronometrarSubprocess(path:str, cmd:str, realTime:bool = True) -> Tuple[str,
     else:
         cpuTimeTaken = __cpuTimer4Linux(command) #depois só deixar disponível a versão do linux de `__cpuTimer4Linux`
         return (path,cpuTimeTaken,"cpu_time")
-def obtainSubprocessInfo(path:str, cmd:str, captureOutput=False, captureSignal=False) -> Tuple[Tuple[str,float],str]:
+def obtainSubprocessInfo(execCommand, captureOutput, captureSignal) -> Tuple[Any,Any,Any]:
     #ok
-    command = __makeCommand(path,cmd)
     if (captureOutput and captureSignal):
-        stdout,stderr,sig = __obtainOutput(command,captureOutput=True, captureSignal=True)
+        stdout,stderr,sig = __obtainOutput(execCommand,captureOutput=True, captureSignal=True)
         return (stdout,stderr,sig)
     elif (captureOutput):
-        stdout,stderr = __obtainOutput(command,captureOutput=True)
-        return (stdout,stderr)
+        stdout,stderr = __obtainOutput(execCommand,captureOutput=True)
+        return (stdout,stderr,None)
     elif (captureSignal):
-        sig = __obtainOutput(command,captureSignal=True)
-        return sig
+        sig = __obtainOutput(execCommand,captureSignal=True)
+        return (None,None,sig)
 #FIM: Executor
 
 
-def initVariables(concurrent:bool, cpuTime:bool) -> Tuple[str,str]:
+#INICIO: FAÇADE
+def initVariables(concurrent:bool, cpuTime:bool,realTime:bool,captureOutput:bool,captureSignal:bool) -> List[str]:
     execType = "concurrent" if concurrent else "sequential"
-    metricType:str = ""
-    if (cpuTime):
-        metricType = "cpuTime"
-    else:
-        metricType = "realTime"
-    return (execType,metricType)
+    output = "output" if captureOutput else None
+    signal = "signal" if captureSignal else None
+    metricType = None
+    if (cpuTime or realTime):
+        metricType = "cpuTime" if cpuTime else "realTime"
+    return [execType,metricType,output,signal]
+#FIM: FAÇADE
+
+
 def queue2List(queue:mp.Queue[Any],length) -> List[Any]:
     return [queue.get() for _ in range(length)]
-#FIM: FAÇADE

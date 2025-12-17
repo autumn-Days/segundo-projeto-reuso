@@ -6,30 +6,53 @@ import utils.estatisticas as stats
 import time #tirar depois
 
 #por falta de nome melhor
-def facade(queue:mp.Queue, origin:str,destiny:str,
-    cmd:str,params:List[str],realTime=False,
-    captureOutput=False) -> Tuple[str,float]:
+def facadeTime(queue:mp.Queue, origin:str,destiny:str,
+    cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
 
-    totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime,captureOutput)
+    totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
     destiny:str = util.createDestinyPath(origin,destiny,params)
-    content:str = util.prepareContent(totalTime)
+    content:str = util.prepareContent(totalTime=totalTime)
     util.createFile(destiny,content)
     queue.put((destiny,totalTime))
 
 
+def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
+    cmd:str,params:List[str],captureOutput:bool,
+    captureSignal:bool) -> Tuple[str,Tuple[str,str,str]]:
+    execCommand:str = util.__makeCommand(origin,cmd)
+    stdout,stderr,signal = util.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
+    destiny:str = util.createDestinyPath(origin,destiny,params)
+    content:str = util.prepareContent(output=(stdout,stderr),signal=signal)
+    util.createFile(destiny,content)
+    queue.put((destiny,(stdout,stderr,signal)))
 
-def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True,
-    cpuTime:bool=False, realTime:bool=False, captureOutput = False) -> None:
-    execType, metricType= util.initVariables(concurrent,cpuTime)
-    params = [execType,metricType]
+
+def execBatch(programs:List[Tuple[str,str,str]],
+    concurrent=True,
+    cpuTime=False,
+    realTime=False,
+    captureOutput=False,
+    captureSignal=False) -> None:
+
+    #concurrent:bool, cpuTime:bool,realTime:bool,captureOutput:bool,captureSignal:bool
+    params = util.initVariables(concurrent,cpuTime,realTime,captureOutput,captureSignal)
+
     processes = []
-    times:mp.queue[Tuple[str,float]] = mp.Queue()
+    #Essa lista vai guardar todos os dados dos programas
+    infos:mp.queue[Tuple[str,float]] = mp.Queue()
 
     for origin,destiny,cmd in programs:
-        p = mp.Process(
-            target = facade,
-            args = (times,origin,destiny,cmd,params,realTime, captureOutput)
-        )
+        p = None
+        if (realTime or cpuTime):
+            p = mp.Process(
+                target = facadeTime,
+                args = (infos,origin,destiny,cmd,params,realTime)
+            )
+        elif (captureOutput or captureSignal):
+            p = mp.Process(
+                target = facadeOutput,
+                args = (infos,origin,destiny,cmd,params,captureOutput,captureSignal)
+            )
         processes.append(p)
         p.start()
         if (not concurrent):
@@ -38,9 +61,9 @@ def execBatch(programs:List[Tuple[str,str,str]], concurrent:bool=True,
     if (concurrent):
         for p in processes:
             p.join()
-    return util.queue2List(times,len(programs))
+    return util.queue2List(infos,len(programs))
 
-
+"""
 class Runner:
     def __init__(self, programs:List[Tuple[str,str,str]]) -> None:
         self.programs = programs
@@ -65,6 +88,7 @@ class Runner:
             for p in processes:
                 p.join()
 """
+"""
 #serve como decorator
 class Analyser:
     def __init__(self, myRuner:"Runner"):
@@ -87,6 +111,14 @@ que especificar o path dos arquivos pode ser meio incoviniente para programas pe
 
 Ou também ser possível combinar funções localmente e comparar com os arquivos, mas uma
 coisa de cada vez.
+"""
+"""
+programs:List[Tuple[str,str,str]],
+concurrent=True,
+cpuTime=False,
+realTime=False,
+captureOutput=False,
+captureSignal=False
 """
 def main():
     programs = [
