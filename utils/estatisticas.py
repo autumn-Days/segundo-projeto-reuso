@@ -1,5 +1,5 @@
 import statistics
-from typing import List
+from typing import List, Tuple
 
 def mean(execTimes:[List[Tuple,str]]) -> float:
     return statistics.mean([time[1][1] for time in execTimes])

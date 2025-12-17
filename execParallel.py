@@ -1,29 +1,36 @@
 import multiprocessing as mp
-from typing import List, Tuple, Callable
-#from utils import utils as util
+from typing import List, Tuple, Any
 import utils.utils as util
+import reproducer.reproducer as repro
+import executor.executor as exec
 import utils.estatisticas as stats
 import time #tirar depois
 
+from facade.facade import Facade
+from runner.runner import Runner
+from analyser.analyser import Analyser
+
 #por falta de nome melhor
+"""
 def facadeTime(queue:mp.Queue, origin:str,destiny:str,
     cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
-    totalTime:float = util.cronometrarSubprocess(origin,cmd,realTime)
-    destiny:str = util.createDestinyPath(origin,destiny,params)
-    content:str = util.prepareContent(totalTime=totalTime[1])
-    util.createFile(destiny,content) 
+    totalTime:float = exec.cronometrarSubprocess(origin,cmd,realTime)
+    destiny:str = repro.createDestinyPath(origin,destiny,params)
+    content:str = repro.prepareContent(totalTime=totalTime[1])
+    repro.createFile(destiny,content) 
     queue.put((origin,totalTime))
 
 
 def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
     cmd:str,params:List[str],captureOutput:bool,
     captureSignal:bool) -> Tuple[str,Tuple[str,str,str]]:
-    execCommand:str = util.__makeCommand(origin,cmd)
-    stdout,stderr,signal = util.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
-    destiny:str = util.createDestinyPath(origin,destiny,params)
-    content:str = util.prepareContent(output=(stdout,stderr),signal=signal)
-    util.createFile(destiny,content)
+    execCommand:str = exec.__makeCommand(origin,cmd)
+    stdout,stderr,signal = exec.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
+    destiny:str = repro.createDestinyPath(origin,destiny,params)
+    content:str = repro.prepareContent(output=(stdout,stderr),signal=signal)
+    repro.createFile(destiny,content)
     queue.put((origin,(stdout,stderr,signal)))
+"""
 
 #
 """
@@ -35,7 +42,7 @@ def display(content:List[Tuple]):
         for con in content:
 """            
 
-
+"""
 def execBatch(programs:List[Tuple[str,str,str]],
     concurrent=True,
     cpuTime=False,
@@ -70,47 +77,9 @@ def execBatch(programs:List[Tuple[str,str,str]],
     if (concurrent):
         for p in processes:
             p.join()
-    return util.queue2List(infos,len(programs))
-
+    return util.queue2List(infos,len(programs))    
 """
-class Runner:
-    def __init__(self, programs:List[Tuple[str,str,str]]) -> None:
-        self.programs = programs
-    
-    def execBatch(self,concurrent:bool=True, cpuTime:bool=False, realTime:bool=False) -> List[Tuple[str,float]]:
-        execType, metricType= util.initVariables(concurrent,cpuTime)
-        params = [execType,metricType]
-        processes = []
-        myQueue = mp.Queue() 
 
-        for origin,destiny,cmd in self.programs:
-            p = mp.Process(
-                target = facade,
-                args = (myQueue,origin,destiny,cmd,params,realTime)
-            )
-            processes.append(p)
-            p.start()
-            if (not concurrent):
-                p.join()
-        
-        if (concurrent):
-            for p in processes:
-                p.join()
-"""
-"""
-#serve como decorator
-class Analyser:
-    def __init__(self, myRuner:"Runner"):
-        self.myRunner = myRunner
-        self.times:Tuple[str,float] = []
-
-
-    def mean(execTimes:List[float]):
-        return statistics.mean(execTimes)
-
-    def stdDevPop(execTimes:List[float]):
-        return statistics.pstdev(execTimes)
-"""
 
 
 """
@@ -137,7 +106,7 @@ def main():
         ("codigosTeste/triviais/programa1.out","codigosTeste/triviais/outputs","./")
         ]
     
-    
+    """
     #Teste da obtenção de outputs
     lista = execBatch(programs,captureOutput=True, captureSignal=True)
     time.sleep(3)
@@ -145,25 +114,46 @@ def main():
     time.sleep(3)
     lista = execBatch(programs,captureSignal=True)
     time.sleep(3)
+    """
     
     
+    #TESTE COM CLASSES INDIVIDUAIS
+    """ 
+    runner = Runner(programs)
+    lista = runner.execBatch(concurrent=True, cpuTime=True)
+
+    analyser = Analyser(runner)
+    print(analyser.mean(lista))
+    """
     
+
     #Teste das estatísticas
     #está pegando
-    lista = execBatch(programs,concurrent=True, cpuTime=True)
+    """
+    lista = execBatch(programs, concurrent=True, cpuTime=True)
     print(stats.fastest(lista))
     print(stats.slowest(lista))
     print(stats.mean(lista))
     print(stats.stdDevPop(lista))
+    """
+
+    interface = Facade()
+
+    interface.setPrograms(programs)
+    interface.runBatch(concurrent=True, cpuTime=True)
+
+    interface.print_stats(mean=True,stdDevPop=True,slowest=True,fastest=True)
     
     
     #Testes dos tipos de execução com tipos de medidas diferentes
     #Está pegando
+    """
     execBatch(programs,concurrent=False, cpuTime=True)
     time.sleep(0.5)
     execBatch(programs,concurrent=True, realTime=True)
     time.sleep(0.5)
     execBatch(programs,concurrent=False, realTime=True)
+    """
     
 if __name__ == "__main__":
     main()
