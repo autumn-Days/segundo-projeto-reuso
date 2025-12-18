@@ -4,29 +4,27 @@ import functions.utils.utils as util
 import functions.reproducer.reproducer as repro
 import functions.executor.executor as exec
 
-def facadeTime(queue:mp.Queue, origin:str, destiny:str,
-    cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
-    totalTime:float = exec.cronometrarSubprocess(origin,cmd,realTime)
-    destinyPath:str = repro.createDestinyPath(origin,destiny,params)
-    content:str = repro.prepareContent(totalTime=totalTime[1])
-    repro.createFile(destinyPath,content) 
-    queue.put((destinyPath,totalTime))
-
-
-def facadeOutput(queue:mp.Queue, origin:str,destiny:str,
-    cmd:str,params:List[str],captureOutput:bool,
-    captureSignal:bool) -> Tuple[str,Tuple[str,str,str]]:
-    execCommand:str = exec.__makeCommand(origin,cmd)
-    stdout,stderr,signal = exec.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
-    destinyPath:str = repro.createDestinyPath(origin,destiny,params)
-    content:str = repro.prepareContent(output=(stdout,stderr),signal=signal)
-    repro.createFile(destinyPath,content)
-    queue.put((destinyPath,(stdout,stderr,signal)))
-
-
 class Runner:
     def __init__(self, programs:List[Tuple[str,str,str]]) -> None:
         self.programs = programs
+    
+    def _facadeTime(self, queue:mp.Queue, origin:str, destiny:str,
+        cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
+        totalTime:float = exec.cronometrarSubprocess(origin,cmd,realTime)
+        destinyPath:str = repro.createDestinyPath(origin,destiny,params)
+        content:str = repro.prepareContent(totalTime=totalTime[1])
+        repro.createFile(destinyPath,content) 
+        queue.put((destinyPath,totalTime))
+
+    def _facadeOutput(self, queue:mp.Queue, origin:str,destiny:str,
+        cmd:str,params:List[str],captureOutput:bool,
+        captureSignal:bool) -> Tuple[str,Tuple[str,str,str]]:
+        execCommand:str = exec.__makeCommand(origin,cmd)
+        stdout,stderr,signal = exec.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
+        destinyPath:str = repro.createDestinyPath(origin,destiny,params)
+        content:str = repro.prepareContent(output=(stdout,stderr),signal=signal)
+        repro.createFile(destinyPath,content)
+        queue.put((destinyPath,(stdout,stderr,signal)))
     
     def execBatch(self,
         concurrent=True,
@@ -46,12 +44,12 @@ class Runner:
             p = None
             if (realTime or cpuTime):
                 p = mp.Process(
-                    target = facadeTime,
+                    target = self._facadeTime,
                     args = (infos,origin,destiny,cmd,params,realTime)
                 )
             elif (captureOutput or captureSignal):
                 p = mp.Process(
-                    target = facadeOutput,
+                    target = self._facadeOutput,
                     args = (infos,origin,destiny,cmd,params,captureOutput,captureSignal)
                 )
             processes.append(p)

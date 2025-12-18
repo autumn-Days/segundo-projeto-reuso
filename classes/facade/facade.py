@@ -12,15 +12,12 @@ class Facade:
         self.runner.programs = programs
     
     def runBatch(self,
-            concurrent=True,
             cpuTime=False,
             realTime=False,
             captureOutput=False,
             captureSignal=False) -> None:
         if realTime == cpuTime :
             realTime, cpuTime = True, False
-
-        self.concurrent = concurrent
 
         self.results = self.runner.execBatch(self.concurrent,cpuTime,realTime,captureOutput,captureSignal)
         return self.results
@@ -30,8 +27,14 @@ class Facade:
     
     def setSequentialBatch(self):
         self.concurrent = False
+    
+    def getResults(self):
+        return self.results
 
     def print_stats(self, mean=False, stdDevPop=False, slowest=False, fastest=False):
+        if self.results is None:
+            raise TypeError("results has None type. Have you runned batch?")
+
         """     Aqui está comentado apenas para preservar o código puro, sem o print
         if mean :
             self.analyser.mean(self.results)
@@ -42,6 +45,7 @@ class Facade:
         if slowest :
             self.analyser.slowest(self.results)
         """
+        
         if mean :
             print(self.analyser.mean(self.results))
         if stdDevPop :
