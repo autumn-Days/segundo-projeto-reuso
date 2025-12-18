@@ -1,26 +1,26 @@
 import multiprocessing as mp
 from typing import List, Tuple, Any
-import functions.utils.utils as util
-import functions.reproducer.reproducer as repro
-import functions.executor.executor as exec
+import functions.utils as util
+import functions.reproducer as repro
+import functions.executor as exe
 
 class Runner:
     def __init__(self, programs:List[Tuple[str,str,str]]) -> None:
         self.programs = programs
     
-    def _facadeTime(self, queue:mp.Queue, origin:str, destiny:str,
+    def _calcTime(self, queue:mp.Queue, origin:str, destiny:str,
         cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
-        totalTime:float = exec.cronometrarSubprocess(origin,cmd,realTime)
+        totalTime:float = exe.cronometrarSubprocess(origin,cmd,realTime)
         destinyPath:str = repro.createDestinyPath(origin,destiny,params)
         content:str = repro.prepareContent(totalTime=totalTime[1])
         repro.createFile(destinyPath,content) 
         queue.put((destinyPath,totalTime))
 
-    def _facadeOutput(self, queue:mp.Queue, origin:str,destiny:str,
+    def _obtainOutput(self, queue:mp.Queue, origin:str,destiny:str,
         cmd:str,params:List[str],captureOutput:bool,
         captureSignal:bool) -> Tuple[str,Tuple[str,str,str]]:
-        execCommand:str = exec.__makeCommand(origin,cmd)
-        stdout,stderr,signal = exec.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
+        execCommand:str = exe.__makeCommand(origin,cmd)
+        stdout,stderr,signal = exe.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
         destinyPath:str = repro.createDestinyPath(origin,destiny,params)
         content:str = repro.prepareContent(output=(stdout,stderr),signal=signal)
         repro.createFile(destinyPath,content)
@@ -44,12 +44,12 @@ class Runner:
             p = None
             if (realTime or cpuTime):
                 p = mp.Process(
-                    target = self._facadeTime,
+                    target = self._calcTime,
                     args = (infos,origin,destiny,cmd,params,realTime)
                 )
             elif (captureOutput or captureSignal):
                 p = mp.Process(
-                    target = self._facadeOutput,
+                    target = self._obtainOutput,
                     args = (infos,origin,destiny,cmd,params,captureOutput,captureSignal)
                 )
             processes.append(p)
