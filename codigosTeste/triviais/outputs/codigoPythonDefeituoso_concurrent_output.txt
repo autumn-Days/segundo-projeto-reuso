@@ -1,0 +1,9 @@
+stdout:
+
+
+
+stderr:
+
+python3: can't open file '/home/gabriel/Desktop/01_University/8_periodo/01_reusoSoftware/trabalhos/999_apresentacao/02_exemplo_plot_graficos/codigosTeste/triviais/codigoPythonDefeituoso.py': [Errno 2] No such file or directory
+
+

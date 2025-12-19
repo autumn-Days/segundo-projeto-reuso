@@ -1,0 +1,67 @@
+import multiprocessing as mp
+from typing import List, Tuple, Any
+import functions.utils as util
+import functions.reproducer as repro
+import functions.executor as exe
+
+class Runner:
+    def __init__(self, programs:List[Tuple[str,str,str]]) -> None:
+        self.programs = programs
+    
+    def _calcTime(self, queue, origin:str, destiny:str,
+        cmd:str,params:List[str],realTime:bool) -> Tuple[str,float]:
+        totalTime:float = exe.cronometrarSubprocess(origin,cmd,realTime)
+        destinyPath:str = repro.createDestinyPath(origin,destiny,params)
+        content:str = repro.prepareContent(totalTime=totalTime[1])
+        repro.createFile(destinyPath,content) 
+        queue.put((destinyPath,totalTime))
+
+    def _obtainOutput(self,queue, origin:str,destiny:str,
+        cmd:str,params:List[str],captureOutput:bool,
+        captureSignal:bool) -> Tuple[str,Tuple[str,str,str]]:
+        execCommand:str = exe._makeCommand(origin,cmd)
+        stdout,stderr,signal = exe.obtainSubprocessInfo(execCommand,captureOutput,captureSignal)
+        destinyPath:str = repro.createDestinyPath(origin,destiny,params)
+        content:str = repro.prepareContent(output=(stdout,stderr),signal=signal)
+        repro.createFile(destinyPath,content)
+        queue.put((destinyPath,(stdout,stderr,signal)))
+    
+    #self.concurrent,cpuTime,realTime,captureOutput,captureSignal
+    def execBatch(self,
+        concurrent=True,
+        cpuTime=False,
+        realTime=False,
+        captureOutput=False,
+        captureSignal=False) -> None:
+
+        #concurrent:bool, cpuTime:bool,realTime:bool,captureOutput:bool,captureSignal:bool
+        params = util.initVariables(concurrent,cpuTime,realTime,captureOutput,captureSignal)
+
+        processes = []
+        #Essa lista vai guardar todos os dados dos programas
+        infos = mp.Queue()
+
+        for origin,destiny,cmd in self.programs:
+            p = None
+            if (realTime or cpuTime):
+                p = mp.Process(
+                    target = self._calcTime,
+                    args = (infos,origin,destiny,cmd,params,realTime)
+                )
+#(self, origin:str,destiny:str, cmd:str,params:List[str],captureOutput:bool, captureSignal:bool
+            elif (captureOutput or captureSignal):
+                p = mp.Process(
+                    target = self._obtainOutput,
+                    args = (infos,origin,destiny,cmd,params,captureOutput,captureSignal)
+                )
+            processes.append(p)
+            p.start()
+            if (not concurrent):
+                p.join()
+        
+        if (concurrent):
+            for p in processes:
+                p.join()
+        
+        return util.queue2List(infos,len(self.programs))
+

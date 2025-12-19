@@ -1,0 +1,20 @@
+stdout:
+
+
+
+stderr:
+
+internal/modules/cjs/loader.js:896
+  throw err;
+  ^
+
+Error: Cannot find module '/home/gabriel/Desktop/01_University/8_periodo/01_reusoSoftware/trabalhos/999_apresentacao/02_exemplo_plot_graficos/codigosTeste/triviais/codigoJavascriptDefeituoso.js'
+    at Function.Module._resolveFilename (internal/modules/cjs/loader.js:893:15)
+    at Function.Module._load (internal/modules/cjs/loader.js:743:27)
+    at Function.executeUserEntryPoint [as runMain] (internal/modules/run_main.js:72:12)
+    at internal/main/run_main_module.js:17:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+
