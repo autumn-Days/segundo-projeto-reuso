@@ -1,0 +1,122 @@
+stdout:
+
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+
+
+stderr:
+
+/home/gabriel/Desktop/01_University/8_periodo/01_reusoSoftware/trabalhos/999_apresentacao/01_biblioteca_MAIS_exe/codigosTeste/triviais/codigoJavascriptDefeituoso.js:6
+		throw new Error("Teste do stderr do javascript!")
+		^
+
+Error: Teste do stderr do javascript!
+    at Object.<anonymous> (/home/gabriel/Desktop/01_University/8_periodo/01_reusoSoftware/trabalhos/999_apresentacao/01_biblioteca_MAIS_exe/codigosTeste/triviais/codigoJavascriptDefeituoso.js:6:9)
+    at Module._compile (internal/modules/cjs/loader.js:1076:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:1097:10)
+    at Module.load (internal/modules/cjs/loader.js:941:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:782:14)
+    at Function.executeUserEntryPoint [as runMain] (internal/modules/run_main.js:72:12)
+    at internal/main/run_main_module.js:17:47
+
+
+signal:
+	1
